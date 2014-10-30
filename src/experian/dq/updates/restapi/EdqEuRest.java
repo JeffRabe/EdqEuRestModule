@@ -1,14 +1,9 @@
 package experian.dq.updates.restapi;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,12 +18,14 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Java sample code for the QAS Electronic Updates Metadata Web API.
  * @author Experian QAS
  */
-public class Program {
+public class EdqEuRest {
 
     /**
      * The user name to use to authenticate with the web service.
@@ -45,15 +42,22 @@ public class Program {
      */
     private static final String DEFAULT_DOWNLOAD_PATH = ".\\QASData";
     
+    /**
+     * The Verbose option (prints to standard out if true)
+     */
     private static final boolean DEFAULT_VERBOSE = false;
 
+    public static final String PACKAGE_ENDPOINT = "https://ws.updates.qas.com/metadata/V1/packages";
+    public static final String DOWNLOAD_ENDPOINT = "https://ws.updates.qas.com/metadata/V1/filedownload";
+    
+    public static final Logger logback = LoggerFactory.getLogger(EdqEuRest.class); 
     
     private String username;
     private String password;
     private String downloadPath;
     private boolean isVerbose;
     
-    public Program( String username, String password, String downloadPath,
+    public EdqEuRest( String username, String password, String downloadPath,
     									boolean isVerbose ){
     	this.username = username;
     	this.password = password;
@@ -61,11 +65,11 @@ public class Program {
     	this.isVerbose = isVerbose;
     }
     
-    public Program( String username, String password, String downloadPath ){
+    public EdqEuRest( String username, String password, String downloadPath ){
     	this( username, password, downloadPath, DEFAULT_VERBOSE );
     }
     
-    public Program(){
+    public EdqEuRest(){
     	this( DEFAULT_USERNAME, DEFAULT_PASSWORD, 
     								DEFAULT_DOWNLOAD_PATH, DEFAULT_VERBOSE );
     }
@@ -76,7 +80,7 @@ public class Program {
      * @return The MD5 hash of the specified file.
      * @throws Exception
      */
-    private String calculateMD5Hash(String fileName) throws Exception {
+    public String calculateMD5Hash(String fileName) throws Exception {
 
         MessageDigest md = MessageDigest.getInstance("MD5");
         FileInputStream stream = new FileInputStream(fileName);
@@ -196,168 +200,210 @@ public class Program {
     public List<PackageGroup> getAvailablePackages() throws Exception {
 
         HttpClient httpClient = new DefaultHttpClient();
+        HttpPost request = null;
         List<PackageGroup> result = new ArrayList<PackageGroup>();
-
+        PackageGroup packageGroup = null;
+      
         try {
-
+        	
             // Create the request JSON
             String body = createPackagesRequest();
 
             // Create the HTTP POST to request the available packages
-            HttpPost request = createHttpPostRequest(
-                "https://ws.updates.qas.com/metadata/V1/packages",
-                body);
+            request = createHttpPostRequest( PACKAGE_ENDPOINT, body);
 
-            HttpResponse response = httpClient.execute(request);
-
-            try {
-
-                if (response.getStatusLine().getStatusCode() != 200) {
-                    throw new Exception(
-                        String.format(
-                            "Request for available packages failed with HTTP Status %d.",
-                            response.getStatusLine().getStatusCode()));
-                }
-
-                // Read the response JSON
-                HttpEntity entity = response.getEntity();
-
-                Reader reader = new BufferedReader(
-                    new InputStreamReader(entity.getContent()));
-
-                JSONParser parser = new JSONParser();
-                JSONObject packagesJson = (JSONObject)parser.parse(reader);
-
-                JSONArray packageGroups = (JSONArray)packagesJson.get("PackageGroups");
+            	JSONArray packageGroups = getAvailablePackageGroups( httpClient, request );
                 Iterator<JSONObject> packageGroupIterator = (Iterator<JSONObject>)packageGroups.iterator();
 
-                System.out.println("Available packages:");
+                logMessage("Available packages:");
 
                 // Iterate through the available package groups
                 while (packageGroupIterator.hasNext()) {
 
                     JSONObject packageGroupJson = (JSONObject)packageGroupIterator.next();
 
-                    String packageGroupCode = (String)packageGroupJson.get("PackageGroupCode");
-                    String vintage = (String)packageGroupJson.get("Vintage");
-
-                    PackageGroup packageGroup = new PackageGroup(packageGroupCode, vintage);
-                    result.add(packageGroup);
-
-                    System.out.println(
-                        String.format(
-                            "Package Group Code: %1$s; Vintage: %2$s",
-                            packageGroup.getPackageGroupCode(),
-                            packageGroup.getVintage()));
-
-                    JSONArray packages = (JSONArray)packageGroupJson.get("Packages");
+                    JSONArray packages = getGroupPackages( packageGroupJson, result );
                     Iterator<?> packageIterator = packages.iterator();
 
                     // Iterate through the available packages
                     while (packageIterator.hasNext()) {
 
                         JSONObject packageJson = (JSONObject)packageIterator.next();
-
-                        String packageCode = (String)packageJson.get("PackageCode");
-
-                        Package thePackage = new Package(packageCode);
-                        packageGroup.getPackages().add(thePackage);
-
-                        System.out.println(
-                            String.format(
-                                "Package Code: %1$s",
-                                thePackage.getPackageCode()));
-
-                        JSONArray files = (JSONArray)packageJson.get("Files");
-                        Iterator<?> fileIterator = files.iterator();
-
-                        // Iterate through the data files
-                        while (fileIterator.hasNext()) {
-
-                            JSONObject fileJson = (JSONObject)fileIterator.next();
-
-                            String fileName = (String)fileJson.get("FileName");
-                            String md5Hash = (String)fileJson.get("Md5Hash");
-                            Long size = (Long)fileJson.get("Size");
-
-                            DataFile dataFile = new DataFile(fileName, md5Hash, size);
-                            thePackage.getDataFiles().add(dataFile);
-
-                            System.out.println(
-                                String.format(
-                                    "Name: %1$s; MD5 Hash: %2$s; Size: %3$d",
-                                    dataFile.getFileName(),
-                                    dataFile.getMD5Hash(),
-                                    dataFile.getSize()));
-                        }
+                        parsePackage( packageJson, packageGroup );
+ 
                     }
                 }
-            }
-            finally {
-                request.releaseConnection();
-            }
-        }
-        finally {
+                
+        } finally {
+        	request.releaseConnection();
             httpClient.getConnectionManager().shutdown();
         }
 
         return result;
     }
 
+    
+    public void logMessage( String message )
+    {
+    	logback.info(message);
+    	if( isVerbose ){
+    		System.out.println(message);
+    	}
+    }
+    
+    public void logMessage( Exception e ){
+    	logback.error( e.getMessage() );
+    	
+    }
+    
     /**
      * Gets a URI to use to download the specified data file.
      * @param dataFile The data file to get a download URI for.
      * @return The download URI to use to download the specified data file, if available; otherwise null.
      * @throws Exception
      */
-    private String getDownloadUri(DataFile dataFile) throws Exception {
+    public String getDownloadUri(DataFile dataFile) throws Exception {
 
         HttpClient httpClient = new DefaultHttpClient();
-
+        HttpPost request = null;
+        
         try {
 
-        	
             // Create the request JSON
             String body = createFileDownloadRequest(dataFile);
 
             // Create the HTTP POST to request a download URI for the specified file
-            HttpPost request = createHttpPostRequest(
-                "https://ws.updates.qas.com/metadata/V1/filedownload",
+            request = createHttpPostRequest(
+                DOWNLOAD_ENDPOINT,
                 body);
 
             HttpResponse response = httpClient.execute(request);
 
-            try {
-
-                if (response.getStatusLine().getStatusCode() != 200) {
+            if (response.getStatusLine().getStatusCode() != 200) {
                     throw new Exception(
                         String.format(
                             "Request for file download URI failed with HTTP Status %d.",
                             response.getStatusLine().getStatusCode()));
-                }
-
-                // Read the response JSON
-                HttpEntity entity = response.getEntity();
-
-                Reader reader = new BufferedReader(
-                    new InputStreamReader(entity.getContent()));
-
-                JSONParser parser = new JSONParser();
-                JSONObject json = (JSONObject)parser.parse(reader);
-
-                // Return the URI, if any
-                return (String)json.get("DownloadUri");
             }
-            finally {
-                request.releaseConnection();
-            }
+
+            // Read the response JSON
+            HttpEntity entity = response.getEntity();
+
+            Reader reader = new BufferedReader(
+            new InputStreamReader(entity.getContent()));
+
+            JSONParser parser = new JSONParser();
+            JSONObject json = (JSONObject)parser.parse(reader);
+
+            // Return the URI, if any
+            return (String)json.get("DownloadUri");
+
         }
         finally {
+        	request.releaseConnection();
             httpClient.getConnectionManager().shutdown();
         }
     }
 
+    /*
+     * Helper method to get available package groups (in JSON format)
+     * from the initial request to the EU service.
+     */
+    private JSONArray getAvailablePackageGroups( HttpClient httpClient, HttpPost request )
+    throws Exception
+    {
+    	
+    	 // Create the request JSON
+        String body = createPackagesRequest();
+
+        // Create the HTTP POST to request the available packages
+        HttpResponse response = httpClient.execute(request);
+
+        if (response.getStatusLine().getStatusCode() != 200) {
+                throw new Exception(
+                    String.format(
+                        "Request for available packages failed with HTTP Status %d.",
+                        response.getStatusLine().getStatusCode()));
+
+        }
+            // Read the response JSON
+        HttpEntity entity = response.getEntity();
+
+        Reader reader = new BufferedReader(
+        new InputStreamReader(entity.getContent()));
+
+        JSONParser parser = new JSONParser();
+        JSONObject packagesJson = (JSONObject)parser.parse(reader);
+
+        JSONArray packageGroups = (JSONArray)packagesJson.get("PackageGroups");
+            
+            
+        return packageGroups;
+    }
     
+    /*
+     * Helper method to get the individual packages from a JSON format
+     * pacakge group as parsed from the EU service.
+     */
+    private JSONArray getGroupPackages( JSONObject packageGroupJson, List<PackageGroup> result ){
+    	 String packageGroupCode = (String)packageGroupJson.get("PackageGroupCode");
+         String vintage = (String)packageGroupJson.get("Vintage");
+
+         PackageGroup packageGroup = new PackageGroup(packageGroupCode, vintage);
+         result.add(packageGroup);
+
+         logMessage(
+             String.format(
+                 "Package Group Code: %1$s; Vintage: %2$s",
+                 packageGroup.getPackageGroupCode(),
+                 packageGroup.getVintage()));
+
+         JSONArray packages = (JSONArray)packageGroupJson.get("Packages");
+         
+         return packages;
+    }
+    
+    /*
+     * Helper method to parse an individual JSON package from the EU
+     * service.  This involves reading the package code, and individual
+     * files and placing them into an individual package group, and
+     * list of total packges.
+     */
+    private void parsePackage( JSONObject packageJson, PackageGroup packageGroup ){
+        String packageCode = (String)packageJson.get("PackageCode");
+
+        Package thePackage = new Package(packageCode);
+        packageGroup.getPackages().add(thePackage);
+
+        logMessage(
+            String.format(
+                "Package Code: %1$s",
+                thePackage.getPackageCode()));
+
+        JSONArray files = (JSONArray)packageJson.get("Files");
+        Iterator<?> fileIterator = files.iterator();
+
+        // Iterate through the data files
+        while (fileIterator.hasNext()) {
+
+            JSONObject fileJson = (JSONObject)fileIterator.next();
+
+            String fileName = (String)fileJson.get("FileName");
+            String md5Hash = (String)fileJson.get("Md5Hash");
+            Long size = (Long)fileJson.get("Size");
+
+            DataFile dataFile = new DataFile(fileName, md5Hash, size);
+            thePackage.getDataFiles().add(dataFile);
+
+            logMessage(
+                String.format(
+                    "Name: %1$s; MD5 Hash: %2$s; Size: %3$d",
+                    dataFile.getFileName(),
+                    dataFile.getMD5Hash(),
+                    dataFile.getSize())
+            );
+        }
+    }
     
     
     /*
@@ -422,4 +468,6 @@ public class Program {
     }
     
     */
+    
+   
 }
