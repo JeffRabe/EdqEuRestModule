@@ -27,6 +27,11 @@ public final class Package {
         this.dataFiles = new ArrayList<DataFile>();
     }
     
+    @Override
+    public String toString(){
+    	return String.format("%s", packageCode);
+    }
+    
     /**
      * Gets the data files in the package.
      * @return A list containing the data files in the package.

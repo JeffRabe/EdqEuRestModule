@@ -57,16 +57,29 @@ public class EdqEuRest {
     private String downloadPath;
     private boolean isVerbose;
     
+    /* get available package variables */
+    private HttpClient httpClient;
+    private HttpPost request;
+    private List<PackageGroup> result;
+    private PackageGroup packageGroup;
+    
     public EdqEuRest( String username, String password, String downloadPath,
     									boolean isVerbose ){
     	this.username = username;
     	this.password = password;
     	this.downloadPath = downloadPath;
     	this.isVerbose = isVerbose;
+    	
+    	httpClient = new DefaultHttpClient();
+    	result = new ArrayList<PackageGroup>();
     }
     
     public EdqEuRest( String username, String password, String downloadPath ){
     	this( username, password, downloadPath, DEFAULT_VERBOSE );
+    }
+    
+    public EdqEuRest( String username, String password ){
+    	this( username, password, DEFAULT_DOWNLOAD_PATH, DEFAULT_VERBOSE );
     }
     
     public EdqEuRest(){
@@ -199,10 +212,7 @@ public class EdqEuRest {
      */
     public List<PackageGroup> getAvailablePackages() throws Exception {
 
-        HttpClient httpClient = new DefaultHttpClient();
-        HttpPost request = null;
-        List<PackageGroup> result = new ArrayList<PackageGroup>();
-        PackageGroup packageGroup = null;
+
       
         try {
         	
@@ -221,8 +231,10 @@ public class EdqEuRest {
                 while (packageGroupIterator.hasNext()) {
 
                     JSONObject packageGroupJson = (JSONObject)packageGroupIterator.next();
-
-                    JSONArray packages = getGroupPackages( packageGroupJson, result );
+                    	
+                    packageGroup = new PackageGroup();
+                    JSONArray packages = getGroupPackages( packageGroupJson, 
+                    									packageGroup, result );
                     Iterator<?> packageIterator = packages.iterator();
 
                     // Iterate through the available packages
@@ -345,11 +357,12 @@ public class EdqEuRest {
      * Helper method to get the individual packages from a JSON format
      * pacakge group as parsed from the EU service.
      */
-    private JSONArray getGroupPackages( JSONObject packageGroupJson, List<PackageGroup> result ){
+    private JSONArray getGroupPackages( JSONObject packageGroupJson, 
+    							PackageGroup packageGroup,List<PackageGroup> result ){
     	 String packageGroupCode = (String)packageGroupJson.get("PackageGroupCode");
          String vintage = (String)packageGroupJson.get("Vintage");
 
-         PackageGroup packageGroup = new PackageGroup(packageGroupCode, vintage);
+         packageGroup = new PackageGroup(packageGroupCode, vintage);
          result.add(packageGroup);
 
          logMessage(

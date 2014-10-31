@@ -23,6 +23,8 @@ public class PackageGroup {
      */
     private final String vintage;
     
+
+    
     /**
      * Initializes a new instance of the PackageGroup class.
      */
@@ -31,6 +33,15 @@ public class PackageGroup {
         this.packageGroupCode = packageGroupCode;
         this.vintage = vintage;
         this.packages = new ArrayList<Package>();
+    }
+    
+    public PackageGroup(){
+    	this( "", "" );
+    }
+    
+    @Override
+    public String toString(){
+    	return String.format("%s,\t%s", this.packageGroupCode, this.vintage);
     }
     
     /**
@@ -56,4 +67,6 @@ public class PackageGroup {
     public String getVintage() {
         return this.vintage;
     }
+    
+    
 }

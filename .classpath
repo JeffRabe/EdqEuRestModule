@@ -10,5 +10,6 @@
 	<classpathentry kind="lib" path="lib/logback-classic-1.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/logback-access-1.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.7.jar"/>
+	<classpathentry kind="lib" path="lib/proweb.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

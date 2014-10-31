@@ -33,6 +33,12 @@ public final class DataFile {
         this.size = size;
     }
     
+    @Override
+    public String toString(){
+    	return String.format("%s\t\t%d\t%s", this.fileName, 
+    									this.size, this.md5Hash);
+    }
+    
     /**
      * Gets the file name.
      * @return The name of the file.
