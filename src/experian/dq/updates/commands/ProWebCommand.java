@@ -5,21 +5,10 @@ import com.qas.proweb.QuickAddress;
 
 public abstract class ProWebCommand implements EuCommand {
 	
-	public static final String COMMAND = "";
-	
 	private String wsdl;
 	private QuickAddress quickAddress;
 	
-	public ProWebCommand( String wsdl )
-	throws QasException
-	{
-		this.wsdl = wsdl;
-	}
-
-	@Override
-	public boolean matchesCommand( String command ){
-		return command.equalsIgnoreCase(COMMAND);
-	}
+	public ProWebCommand() { }
 	
 	public String getWsdl() {
 		return wsdl;

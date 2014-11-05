@@ -4,8 +4,11 @@ import java.text.ParseException;
 
 import com.qas.proweb.QasException;
 
+import experian.dq.updates.commands.args.EuArguments;
+
 public interface EuCommand {
 	
-	public boolean execute() throws QasException, ParseException, Exception;
-	public boolean matchesCommand( String command );
+	public boolean execute( EuArguments args) 
+			throws QasException, ParseException, Exception;
+
 }

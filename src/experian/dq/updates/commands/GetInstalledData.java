@@ -8,6 +8,10 @@ import java.util.Locale;
 import com.qas.proweb.DataSet;
 import com.qas.proweb.LicensedSet;
 import com.qas.proweb.QasException;
+import com.qas.proweb.QuickAddress;
+
+import experian.dq.updates.commands.args.EuArguments;
+import experian.dq.updates.commands.args.GetInstalledDataArgs;
 
 /**
  * EU Command that shows the currently installed QAS Pro Web Dat Sets.
@@ -20,19 +24,38 @@ import com.qas.proweb.QasException;
  */
 public class GetInstalledData extends ProWebCommand {
 
-	public static final String COMMAND = "GetInstalledData";
-	
-	public GetInstalledData( String wsdl )
-	throws QasException
-	{
-		super(wsdl);
-	}
 	
 	/**
 	 * Print the currently installed Pro Web Data Sets line by line.
 	 */
 	@Override
-	public boolean execute()
+	public boolean execute( EuArguments args )
+	throws QasException, ParseException
+	{
+		
+		// check for correct argument type for command
+		if( !(args instanceof GetInstalledDataArgs ) ){
+			throw new IllegalArgumentException(
+					"Incorrect parameters passed for command: " 
+							+ this.getClass().getName()
+			);
+		}
+		
+		// read in params
+		GetInstalledDataArgs commandArgs = (GetInstalledDataArgs) args;
+		
+		setWsdl( commandArgs.getWsdl() );
+		setQuickAddress( new QuickAddress(getWsdl()) );
+		
+		// execute helper method to print data info
+		return getInstalledData();
+	}
+	
+	/*
+	 * Helper method to print the current data set information
+	 * using QAS Pro Web.
+	 */
+	private boolean getInstalledData()
 	throws QasException, ParseException
 	{
 		DataSet currentData[] = this.getQuickAddress().getAllDataSets();

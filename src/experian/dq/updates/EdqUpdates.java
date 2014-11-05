@@ -1,9 +1,11 @@
 package experian.dq.updates;
 
-import java.util.List;
-
+import experian.dq.updates.commands.EuCommand;
+import experian.dq.updates.commands.args.EuArguments;
+import experian.dq.updates.commands.args.GetAvailableDataArgs;
+import experian.dq.updates.commands.args.GetDownloadUrlArgs;
+import experian.dq.updates.commands.args.GetInstalledDataArgs;
 import experian.dq.updates.restapi.EdqEuRest;
-import experian.dq.updates.restapi.PackageGroup;
 
 public class EdqUpdates {
 
@@ -22,7 +24,7 @@ public class EdqUpdates {
 		try{
 			
 			parseArguments( args );
-			executeCommand();
+			executeCommand( args );
 			
 			
 		}catch(Exception e){
@@ -44,17 +46,95 @@ public class EdqUpdates {
 		if( args[0].equals("") || args[1].equals("") )
 			throw new Exception(USAGE);
 			
-			
+		command = args[0];
+		
+		
 		
 	}
 	
-	private static void executeCommand()
+	private static void executeCommand( String []args )
 	throws Exception
 	{
-		List<PackageGroup> packages = euService.getAvailablePackages();
-		for( PackageGroup pack : packages ){
-			System.out.println(pack);
+		try{
+			Class<?> commandClass = Class.forName( command );
+			Object commandObj = commandClass.newInstance();
+			if( !(commandObj instanceof EuCommand ) ) {
+				throw new IllegalArgumentException(
+						"Invalid Command: " + command );
+			}
+			
+			EuArguments commandArgs = null;
+			
+			switch( commandObj.getClass().getName() ){
+				
+				case "GetDownloadUrlArgs":
+					if( !hasSufficientArgs(args, 6) )
+						return;
+					
+					// username, password, filename, md5, filezie
+					commandArgs = new GetDownloadUrlArgs( args[1], args[2],
+											args[3], args[4], args[5] );
+					break;
+					
+				case "GetInstalledDataArgs":
+					if( !hasSufficientArgs(args, 2) )
+						return;
+					
+					// wsdl
+					commandArgs = new GetInstalledDataArgs(args[1]);
+					break;
+					
+				case "GetAvailableDataArgs":
+					if( !hasSufficientArgs(args, 3) )
+						return;
+					
+					// username, password
+					commandArgs = new GetAvailableDataArgs( args[1], args[2] );
+					
+					break;
+					
+				default:
+					throw new IllegalArgumentException(
+							"Unsupported Command: " + command
+							);
+				
+			}
+			
+			EuCommand euCommand = (EuCommand) commandObj;
+			euCommand.execute( commandArgs );
+			
+		}catch( ClassNotFoundException cnf ){
+			throw new IllegalArgumentException(
+					"Invalid command specified: " + command
+			);
+		}
+	}
+	
+	/*
+	private EuArguments getCommandArguments( String commandClassName, 
+															String []args){
+		
+	}
+	*/
+	
+	private static boolean hasSufficientArgs( String []args, 
+													int totalRequired ){
+		if( args.length < totalRequired ){
+			throw new IllegalArgumentException(
+					"The specified command requires more arguments: " 
+					+ command 
+			);
 		}
 		
+		for( int i = 0 ; i < args.length; i++ ){
+			String currentArg = args[i];
+			if( currentArg.trim().equals("") ){
+				throw new IllegalArgumentException(
+						"The specified command does not allow empty parameters"
+				);
+			}
+		}
+		
+		return true;
 	}
 }

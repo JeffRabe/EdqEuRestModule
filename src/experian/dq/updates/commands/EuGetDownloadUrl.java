@@ -1,5 +1,7 @@
 package experian.dq.updates.commands;
 
+import experian.dq.updates.commands.args.EuArguments;
+import experian.dq.updates.commands.args.GetDownloadUrlArgs;
 import experian.dq.updates.restapi.DataFile;
 
 /**
@@ -21,21 +23,39 @@ public class EuGetDownloadUrl extends EuServiceCommand {
 	long size;
 	private DataFile datafile;
 	
-	public EuGetDownloadUrl( String username, String password, 
-									String filename, String md5, String size ){
-		super(username, password);
-		this.filename = filename;
-		this.md5 = md5;
-		this.size = new Long(size);
-		this.datafile = new DataFile(filename, md5, this.size);
-	}
+	public EuGetDownloadUrl() { }
 	
-	public boolean execute()
+	public boolean execute( EuArguments args )
 	throws Exception
 	{
-		String downloadUri = this.getEuService().getDownloadUri(this.datafile);
-		System.out.println(downloadUri);
-		return true;
+		
+		if( !( args instanceof GetDownloadUrlArgs ) ){
+			throw new IllegalArgumentException(
+					"Incorrect parameters passed for command: " 
+							+ this.getClass().getName()
+			);
+		}
+		
+		GetDownloadUrlArgs commandArgs = (GetDownloadUrlArgs) args;
+		
+		try{
+		
+			
+			this.filename = commandArgs.getFilename();
+			this.md5 = commandArgs.getMd5Hash();
+			this.size = Long.parseLong( commandArgs.getFileSize() );
+			
+			
+			String downloadUri = this.getEuService().getDownloadUri(this.datafile);
+			System.out.println(downloadUri);
+			return true;
+		}catch( NumberFormatException nfe ){
+			throw new IllegalArgumentException(
+					"The specified arguments contain an invalid file size: "
+					+ commandArgs.getFileSize()
+				);
+			
+		}
 	}
 
 }
