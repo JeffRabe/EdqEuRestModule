@@ -5,6 +5,7 @@ import experian.dq.updates.commands.args.EuArguments;
 import experian.dq.updates.commands.args.GetAvailableDataArgs;
 import experian.dq.updates.commands.args.GetDownloadUrlArgs;
 import experian.dq.updates.commands.args.GetInstalledDataArgs;
+import experian.dq.updates.commands.args.GetPackageDataFilesArgs;
 import experian.dq.updates.restapi.EdqEuRest;
 
 public class EdqUpdates {
@@ -40,7 +41,7 @@ public class EdqUpdates {
 	throws Exception
 	{
 		
-		if( args.length != 2 )
+		if( args.length < 2 )
 			throw new Exception(USAGE);
 			
 		if( args[0].equals("") || args[1].equals("") )
@@ -56,7 +57,8 @@ public class EdqUpdates {
 	throws Exception
 	{
 		try{
-			Class<?> commandClass = Class.forName( command );
+			String fqCommandName = "experian.dq.updates.commands." + command;
+			Class<?> commandClass = Class.forName( fqCommandName );
 			Object commandObj = commandClass.newInstance();
 			if( !(commandObj instanceof EuCommand ) ) {
 				throw new IllegalArgumentException(
@@ -64,10 +66,10 @@ public class EdqUpdates {
 			}
 			
 			EuArguments commandArgs = null;
-			
-			switch( commandObj.getClass().getName() ){
+			String commandName = commandObj.getClass().getCanonicalName();
+			switch( command ){
 				
-				case "GetDownloadUrlArgs":
+				case "GetDownloadUrl":
 					if( !hasSufficientArgs(args, 6) )
 						return;
 					
@@ -76,7 +78,7 @@ public class EdqUpdates {
 											args[3], args[4], args[5] );
 					break;
 					
-				case "GetInstalledDataArgs":
+				case "GetInstalledData":
 					if( !hasSufficientArgs(args, 2) )
 						return;
 					
@@ -84,7 +86,7 @@ public class EdqUpdates {
 					commandArgs = new GetInstalledDataArgs(args[1]);
 					break;
 					
-				case "GetAvailableDataArgs":
+				case "GetAvailableData":
 					if( !hasSufficientArgs(args, 3) )
 						return;
 					
@@ -93,11 +95,17 @@ public class EdqUpdates {
 					
 					break;
 					
+				case "GetPackageDataFiles":
+					if( !hasSufficientArgs(args, 4) )
+						return;
+					
+					commandArgs = new GetPackageDataFilesArgs( args[1], 
+															args[2], args[3]);
+					break;
 				default:
 					throw new IllegalArgumentException(
 							"Unsupported Command: " + command
 							);
-				
 			}
 			
 			EuCommand euCommand = (EuCommand) commandObj;
@@ -109,13 +117,6 @@ public class EdqUpdates {
 			);
 		}
 	}
-	
-	/*
-	private EuArguments getCommandArguments( String commandClassName, 
-															String []args){
-		
-	}
-	*/
 	
 	private static boolean hasSufficientArgs( String []args, 
 													int totalRequired ){

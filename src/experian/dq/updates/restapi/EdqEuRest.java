@@ -234,14 +234,14 @@ public class EdqEuRest {
                     	
                     packageGroup = new PackageGroup();
                     JSONArray packages = getGroupPackages( packageGroupJson, 
-                    									packageGroup, result );
+                    													result );
                     Iterator<?> packageIterator = packages.iterator();
 
                     // Iterate through the available packages
                     while (packageIterator.hasNext()) {
 
                         JSONObject packageJson = (JSONObject)packageIterator.next();
-                        parsePackage( packageJson, packageGroup );
+                        parsePackage( packageJson );
  
                     }
                 }
@@ -358,7 +358,7 @@ public class EdqEuRest {
      * pacakge group as parsed from the EU service.
      */
     private JSONArray getGroupPackages( JSONObject packageGroupJson, 
-    							PackageGroup packageGroup,List<PackageGroup> result ){
+    										List<PackageGroup> result ){
     	 String packageGroupCode = (String)packageGroupJson.get("PackageGroupCode");
          String vintage = (String)packageGroupJson.get("Vintage");
 
@@ -382,11 +382,11 @@ public class EdqEuRest {
      * files and placing them into an individual package group, and
      * list of total packges.
      */
-    private void parsePackage( JSONObject packageJson, PackageGroup packageGroup ){
+    private void parsePackage( JSONObject packageJson ){
         String packageCode = (String)packageJson.get("PackageCode");
 
         Package thePackage = new Package(packageCode);
-        packageGroup.getPackages().add(thePackage);
+        
 
         logMessage(
             String.format(
@@ -416,6 +416,8 @@ public class EdqEuRest {
                     dataFile.getSize())
             );
         }
+        
+        packageGroup.getPackages().add(thePackage);
     }
     
     

@@ -1,5 +1,6 @@
 package experian.dq.updates.commands;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -67,6 +68,7 @@ public class GetInstalledData extends ProWebCommand {
 			
 			LicensedSet set = dataDetail[0];
 			String vintage = set.getVersion();
+
 			String vintageDate = convertPwDate(vintage);
 			int daysLeft = set.getDataDaysLeft();
 			String dataInfo = String.format("%s\t%s\t%d", 
@@ -85,6 +87,8 @@ public class GetInstalledData extends ProWebCommand {
 	throws ParseException
 	{
 		Date date = new SimpleDateFormat("dd MMMM yyyy", Locale.ENGLISH).parse(dataVersion);
-		return date.toString();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		return sdf.format(date);
+
 	}
 }

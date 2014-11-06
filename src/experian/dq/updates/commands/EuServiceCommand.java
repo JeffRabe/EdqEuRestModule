@@ -16,4 +16,8 @@ public abstract class EuServiceCommand implements EuCommand {
 		this.euService = euService;
 	}
 	
+	public void setEuService( String username, String password ){
+		this.euService = new EdqEuRest(username, password);
+	}
+	
 }

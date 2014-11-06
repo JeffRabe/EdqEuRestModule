@@ -41,7 +41,7 @@ public class PackageGroup {
     
     @Override
     public String toString(){
-    	return String.format("%s,\t%s", this.packageGroupCode, this.vintage);
+    	return String.format("%s\t%s", this.packageGroupCode, this.vintage);
     }
     
     /**
