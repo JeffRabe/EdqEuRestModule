@@ -10,13 +10,10 @@ import experian.dq.updates.restapi.EdqEuRest;
 
 public class EdqUpdates {
 
-	public static final String USAGE = "EdqUpdates command params";
+	public static final String USAGE = "EdqUpdates command [params]";
 	
 	private static final boolean DEBUG = true;
-	
-	private static EdqEuRest euService;
-	private static String username;
-	private static String password;
+
 	private static String command;
 	
 	public static void main( String []args ){
@@ -35,8 +32,7 @@ public class EdqUpdates {
 			
 		System.exit(0);
 	}
-	
-	
+
 	private static void parseArguments( String []args )
 	throws Exception
 	{
@@ -48,9 +44,6 @@ public class EdqUpdates {
 			throw new Exception(USAGE);
 			
 		command = args[0];
-		
-		
-		
 	}
 	
 	private static void executeCommand( String []args )

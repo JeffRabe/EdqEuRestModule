@@ -9,7 +9,7 @@ import experian.dq.updates.commands.args.EuArguments;
 
 public abstract class EuCommandImpl implements EuCommand{
 
-	public abstract boolean execute( EuArguments args) 
+	public abstract String execute( EuArguments args) 
 					throws QasException, ParseException, Exception;
 	
 	public static boolean isValidCommand( String command ){

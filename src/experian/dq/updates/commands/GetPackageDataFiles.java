@@ -12,7 +12,7 @@ public class GetPackageDataFiles extends EuServiceCommand {
 	
 	public GetPackageDataFiles() { }
 	
-	public boolean execute( EuArguments args )
+	public String execute( EuArguments args )
 	throws Exception
 	{
 		
@@ -24,6 +24,8 @@ public class GetPackageDataFiles extends EuServiceCommand {
 		}
 		
 		GetPackageDataFilesArgs commandArgs = (GetPackageDataFilesArgs) args;
+		StringBuilder buf = new StringBuilder();
+		
 		String username = commandArgs.getUsername();
 		String password = commandArgs.getPassword();
 		String dataCode = commandArgs.getDataPackageCode();
@@ -43,11 +45,11 @@ public class GetPackageDataFiles extends EuServiceCommand {
 				List<DataFile> dataFiles = dataPack.getDataFiles();
 				
 				for( DataFile file : dataFiles ){
-					System.out.println(file);
+					buf.append(file.toString());
 				}
 			}
 		}
 		
-		return true;
+		return buf.toString();
 	}
 }

@@ -16,8 +16,6 @@ import experian.dq.updates.restapi.DataFile;
  */
 public class EuGetDownloadUrl extends EuServiceCommand {
 	
-	public static final String COMMAND = "GetDownloadUri";
-	
 	private String filename;
 	private String md5;
 	long size;
@@ -25,7 +23,7 @@ public class EuGetDownloadUrl extends EuServiceCommand {
 	
 	public EuGetDownloadUrl() { }
 	
-	public boolean execute( EuArguments args )
+	public String execute( EuArguments args )
 	throws Exception
 	{
 		
@@ -38,6 +36,7 @@ public class EuGetDownloadUrl extends EuServiceCommand {
 		
 		GetDownloadUrlArgs commandArgs = (GetDownloadUrlArgs) args;
 		
+		
 		try{
 		
 			
@@ -47,8 +46,8 @@ public class EuGetDownloadUrl extends EuServiceCommand {
 			
 			
 			String downloadUri = this.getEuService().getDownloadUri(this.datafile);
-			System.out.println(downloadUri);
-			return true;
+			return downloadUri;
+			
 		}catch( NumberFormatException nfe ){
 			throw new IllegalArgumentException(
 					"The specified arguments contain an invalid file size: "

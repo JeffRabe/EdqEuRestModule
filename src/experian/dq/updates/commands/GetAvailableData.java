@@ -11,7 +11,7 @@ public class GetAvailableData extends EuServiceCommand
 	
 	public GetAvailableData() { }
 	
-	public boolean execute( EuArguments args )
+	public String execute( EuArguments args )
 	throws Exception
 	{
 		
@@ -23,16 +23,17 @@ public class GetAvailableData extends EuServiceCommand
 		}
 		
 		GetAvailableDataArgs commandArgs = (GetAvailableDataArgs) args;
+		StringBuilder buf = new StringBuilder();
 		String username = commandArgs.getUsername();
 		String password = commandArgs.getPassword();
 		
 		setEuService(username, password);
 		List<PackageGroup> availablePackages = getEuService().getAvailablePackages();
 		for( PackageGroup dataPack : availablePackages ){
-			System.out.println( dataPack );
+			buf.append(dataPack.toString());
 		}
 		
-		return true;
+		return buf.toString();
 	}
 
 }

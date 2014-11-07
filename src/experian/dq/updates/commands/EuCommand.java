@@ -8,7 +8,7 @@ import experian.dq.updates.commands.args.EuArguments;
 
 public interface EuCommand {
 	
-	public boolean execute( EuArguments args) 
+	public String execute( EuArguments args) 
 			throws QasException, ParseException, Exception;
 
 }

@@ -30,7 +30,7 @@ public class GetInstalledData extends ProWebCommand {
 	 * Print the currently installed Pro Web Data Sets line by line.
 	 */
 	@Override
-	public boolean execute( EuArguments args )
+	public String execute( EuArguments args )
 	throws QasException, ParseException
 	{
 		
@@ -45,6 +45,7 @@ public class GetInstalledData extends ProWebCommand {
 		// read in params
 		GetInstalledDataArgs commandArgs = (GetInstalledDataArgs) args;
 		
+		
 		setWsdl( commandArgs.getWsdl() );
 		setQuickAddress( new QuickAddress(getWsdl()) );
 		
@@ -56,10 +57,12 @@ public class GetInstalledData extends ProWebCommand {
 	 * Helper method to print the current data set information
 	 * using QAS Pro Web.
 	 */
-	private boolean getInstalledData()
+	private String getInstalledData()
 	throws QasException, ParseException
 	{
 		DataSet currentData[] = this.getQuickAddress().getAllDataSets();
+		StringBuilder buf = new StringBuilder();
+		
 		for( int i = 0; i < currentData.length; i++ ){
 			DataSet data = currentData[i];
 			String dataId = data.getID();
@@ -73,10 +76,10 @@ public class GetInstalledData extends ProWebCommand {
 			int daysLeft = set.getDataDaysLeft();
 			String dataInfo = String.format("%s\t%s\t%d", 
 										dataId, vintageDate, daysLeft);
-			System.out.println(dataInfo);
+			buf.append(dataInfo);
 		}
 		
-		return true;
+		return buf.toString();
 	}
 	
 	/*
