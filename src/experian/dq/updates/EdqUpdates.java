@@ -22,15 +22,16 @@ public class EdqUpdates {
 		try{
 			
 			parseArguments( args );
-			executeCommand( args );
-			
+			String output = executeCommand( args );
+			System.out.println(output);
+			System.exit(0);
 			
 		}catch(Exception e){
 			euService.logMessage(e);
 			System.exit(1);
 		}
 			
-		System.exit(0);
+		
 	}
 
 	private static void parseArguments( String []args )
@@ -46,7 +47,7 @@ public class EdqUpdates {
 		command = args[0];
 	}
 	
-	private static void executeCommand( String []args )
+	private static String executeCommand( String []args )
 	throws Exception
 	{
 		try{
@@ -58,57 +59,58 @@ public class EdqUpdates {
 						"Invalid Command: " + command );
 			}
 			
-			EuArguments commandArgs = null;
-			String commandName = commandObj.getClass().getCanonicalName();
-			switch( command ){
-				
-				case "GetDownloadUrl":
-					if( !hasSufficientArgs(args, 6) )
-						return;
-					
-					// username, password, filename, md5, filezie
-					commandArgs = new GetDownloadUrlArgs( args[1], args[2],
-											args[3], args[4], args[5] );
-					break;
-					
-				case "GetInstalledData":
-					if( !hasSufficientArgs(args, 2) )
-						return;
-					
-					// wsdl
-					commandArgs = new GetInstalledDataArgs(args[1]);
-					break;
-					
-				case "GetAvailableData":
-					if( !hasSufficientArgs(args, 3) )
-						return;
-					
-					// username, password
-					commandArgs = new GetAvailableDataArgs( args[1], args[2] );
-					
-					break;
-					
-				case "GetPackageDataFiles":
-					if( !hasSufficientArgs(args, 4) )
-						return;
-					
-					commandArgs = new GetPackageDataFilesArgs( args[1], 
-															args[2], args[3]);
-					break;
-				default:
-					throw new IllegalArgumentException(
-							"Unsupported Command: " + command
-							);
-			}
-			
+			EuArguments commandArgs = getCommandArguments( args );
+
 			EuCommand euCommand = (EuCommand) commandObj;
-			euCommand.execute( commandArgs );
+			return euCommand.execute( commandArgs );
 			
 		}catch( ClassNotFoundException cnf ){
 			throw new IllegalArgumentException(
 					"Invalid command specified: " + command
 			);
 		}
+	}
+	
+	private static EuArguments getCommandArguments( String []args ){
+		
+		switch( command ){
+		
+			case "GetDownloadUrl":
+				if( !hasSufficientArgs(args, 6) )
+					break;
+				
+				// username, password, filename, md5, filezie
+				return new GetDownloadUrlArgs( args[1], args[2],
+										args[3], args[4], args[5] );
+				
+			case "GetInstalledData":
+				if( !hasSufficientArgs(args, 2) )
+					break;
+				
+				// wsdl
+				return new GetInstalledDataArgs(args[1]);
+				
+			case "GetAvailableData":
+				if( !hasSufficientArgs(args, 3) )
+					break;
+				
+				// username, password
+				return new GetAvailableDataArgs( args[1], args[2] );
+				
+			case "GetPackageDataFiles":
+				if( !hasSufficientArgs(args, 4) )
+					break;
+				
+				return new GetPackageDataFilesArgs( args[1], 
+														args[2], args[3]);
+			// Default case is that we don't recognize the command
+			default:	break;
+				
+		}
+		// Get your weirdo command out of here!  Freak!
+		throw new IllegalArgumentException(
+				"Unsupported Command: " + command
+				);
 	}
 	
 	private static boolean hasSufficientArgs( String []args, 

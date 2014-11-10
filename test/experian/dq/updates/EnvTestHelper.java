@@ -1,8 +1,9 @@
 package experian.dq.updates;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 
@@ -42,12 +43,10 @@ public class EnvTestHelper {
 	private void loadProperties()
 	throws IOException
 	{
-		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE);
-		prop.load(inputStream);
-		if (inputStream == null) {
-			throw new FileNotFoundException("property file '" + PROPERTIES_FILE + "' not found in the classpath");
-		}
- 
+		prop = new Properties();
+		FileInputStream fileStream = new FileInputStream( new File(PROPERTIES_FILE));
+
+		prop.load(fileStream);
 		euUsername = prop.getProperty("username");
 		euPassword = prop.getProperty("password");
 		proWebWsdlUrn = prop.getProperty("wsdl");

@@ -39,11 +39,14 @@ public class EuGetDownloadUrl extends EuServiceCommand {
 		
 		try{
 		
+			String username = commandArgs.getUsername();
+			String password = commandArgs.getPassword();
+			setEuService( username, password );
 			
 			this.filename = commandArgs.getFilename();
 			this.md5 = commandArgs.getMd5Hash();
 			this.size = Long.parseLong( commandArgs.getFileSize() );
-			
+			this.datafile = new DataFile(filename, md5, size );
 			
 			String downloadUri = this.getEuService().getDownloadUri(this.datafile);
 			return downloadUri;

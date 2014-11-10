@@ -12,6 +12,13 @@ public class GetPackageDataFiles extends EuServiceCommand {
 	
 	public GetPackageDataFiles() { }
 	
+	/**
+	 * This execute implementation gets all the data files for
+	 * a given data package.  The information for a given data
+	 * files can be seein in the DataFile class.
+	 * 
+	 * @see DataFile.java
+	 */
 	public String execute( EuArguments args )
 	throws Exception
 	{
@@ -30,6 +37,8 @@ public class GetPackageDataFiles extends EuServiceCommand {
 		String password = commandArgs.getPassword();
 		String dataCode = commandArgs.getDataPackageCode();
 		setEuService( username, password );
+		
+		// get list of pacakges
 		List<PackageGroup> availablePackages = getEuService().getAvailablePackages();
 		
 		for( PackageGroup dataGroup : availablePackages ){
@@ -46,6 +55,7 @@ public class GetPackageDataFiles extends EuServiceCommand {
 				
 				for( DataFile file : dataFiles ){
 					buf.append(file.toString());
+					buf.append("\n");
 				}
 			}
 		}
