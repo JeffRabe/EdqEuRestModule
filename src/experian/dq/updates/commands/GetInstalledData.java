@@ -77,6 +77,7 @@ public class GetInstalledData extends ProWebCommand {
 			String dataInfo = String.format("%s\t%s\t%d", 
 										dataId, vintageDate, daysLeft);
 			buf.append(dataInfo);
+			buf.append("\n");
 		}
 		
 		return buf.toString();

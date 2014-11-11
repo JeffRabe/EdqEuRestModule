@@ -31,6 +31,7 @@ public class GetAvailableData extends EuServiceCommand
 		List<PackageGroup> availablePackages = getEuService().getAvailablePackages();
 		for( PackageGroup dataPack : availablePackages ){
 			buf.append(dataPack.toString());
+			buf.append("\n");
 		}
 		
 		return buf.toString();

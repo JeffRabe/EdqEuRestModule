@@ -33,8 +33,8 @@ public class EdqUpdates {
 		try{
 			
 			// execute wrapper method
-			executeEdqUpdates( args );
-			
+			String output = executeEdqUpdates( args );
+			System.out.println(output);
 			// Exit 0 for success to calling process
 			System.exit(0);
 			
@@ -127,40 +127,38 @@ public class EdqUpdates {
 	 */
 	private static EuArguments getCommandArguments( String []args ){
 		
-		switch( command ){
 		
-			case "GetDownloadUrl":
-				if( !hasSufficientArgs(args, 6) )
-					break;
+			// JDK 6 does not support switch for Strings :/
+			if( command.equalsIgnoreCase("GetDownloadUrl")){
+				if( hasSufficientArgs(args, 6) ){
+					
 				
-				// username, password, filename, md5, filezie
-				return new GetDownloadUrlArgs( args[1], args[2],
-										args[3], args[4], args[5] );
+					// username, password, filename, md5, filezie
+					return new GetDownloadUrlArgs( args[1], args[2],
+											args[3], args[4], args[5] );
+				}
+			}else if( command.equalsIgnoreCase("GetInstalledData")){
+				if( hasSufficientArgs(args, 2) ){
 				
-			case "GetInstalledData":
-				if( !hasSufficientArgs(args, 2) )
-					break;
+					// wsdl
+					return new GetInstalledDataArgs(args[1]);
+				}
+			}else if( command.equalsIgnoreCase("GetAvailableData")){
+				if( hasSufficientArgs(args, 3) ){
+					
+					// username, password
+					return new GetAvailableDataArgs( args[1], args[2] );
+				}
+			}else if( command.equalsIgnoreCase("GetPackageDataFiles")){
+				if( hasSufficientArgs(args, 4) ){
 				
-				// wsdl
-				return new GetInstalledDataArgs(args[1]);
-				
-			case "GetAvailableData":
-				if( !hasSufficientArgs(args, 3) )
-					break;
-				
-				// username, password
-				return new GetAvailableDataArgs( args[1], args[2] );
-				
-			case "GetPackageDataFiles":
-				if( !hasSufficientArgs(args, 4) )
-					break;
-				
-				return new GetPackageDataFilesArgs( args[1], 
-														args[2], args[3]);
-			// Default case is that we don't recognize the command
-			default:	break;
-				
-		}
+					return new GetPackageDataFilesArgs( args[1], 
+															args[2], args[3]);
+				}
+			
+			}
+			
+		// Default case is that we don't recognize the command
 		// Get your weirdo command out of here!  Freak!
 		throw new IllegalArgumentException(
 				"Unsupported Command: " + command

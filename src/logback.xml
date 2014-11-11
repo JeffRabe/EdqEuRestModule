@@ -2,9 +2,9 @@
 
     <!-- LOG_FILE_NAME: Java system properties set on the command line  -->
     <!-- LOG_HOME: Set at this line below -->
-    <property name="LOG_HOME" value="/home/sebastien" />
+	<property name="LOG_HOME" value="/home/jrabe/apps/eu/log" />
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender" level="ERROR">
         <encoder>
             <pattern>%date %-5level [%thread] - [%logger]- %msg%n</pattern>
         </encoder>
@@ -18,8 +18,8 @@
     </appender>
 
 
-    <root level="WARN">
+    <root level="ERROR">
         <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
+        <!-- <appender-ref ref="FILE" />-->
     </root>
 </configuration>
