@@ -2,7 +2,7 @@ package experian.dq.updates.commands;
 
 import java.io.IOException;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -11,7 +11,7 @@ import experian.dq.updates.EnvTestHelper;
 import experian.dq.updates.commands.args.GetAvailableDataArgs;
 import experian.dq.updates.commands.args.GetInstalledDataArgs;
 
-public class GetAvailableDataTest extends TestCase {
+public class GetAvailableDataTest {
 	
 	private static EnvTestHelper tester;
 	

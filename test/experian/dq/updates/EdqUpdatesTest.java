@@ -2,12 +2,12 @@ package experian.dq.updates;
 
 import java.io.IOException;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class EdqUpdatesTest extends TestCase {
+public class EdqUpdatesTest {
 	
 	private static EnvTestHelper tester;
 	
@@ -23,12 +23,13 @@ public class EdqUpdatesTest extends TestCase {
 	{
 		String username = tester.getEuUsername();
 		String password = tester.getEuPassword();
-		String command = "GetAvailebleData";
+		String command = "GetAvailableData";
 		
 		String args[] = new String[3];
-		args[0] = username;
-		args[1] = password;
-		args[2] = command;
+		args[0] = command;
+		args[1] = username;
+		args[2] = password;
+		
 		
 		EdqUpdates.main(args);
 	}

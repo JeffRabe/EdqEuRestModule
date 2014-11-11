@@ -2,7 +2,7 @@ package experian.dq.updates.commands;
 
 import java.io.IOException;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import org.junit.Test;
 import experian.dq.updates.EnvTestHelper;
 import experian.dq.updates.commands.args.GetInstalledDataArgs;
 
-public class GetInstalledDataTest extends TestCase {
+public class GetInstalledDataTest {
 
 	private static EnvTestHelper tester;
 	

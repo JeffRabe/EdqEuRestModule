@@ -2,7 +2,7 @@ package experian.dq.updates.commands;
 
 import java.util.List;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -13,7 +13,7 @@ import experian.dq.updates.restapi.EdqEuRest;
 import experian.dq.updates.restapi.PackageGroup;
 import experian.dq.updates.restapi.Package;
 
-public class GetPackageDataFilesTest extends TestCase {
+public class GetPackageDataFilesTest {
 
 	private static EnvTestHelper tester;
 	
